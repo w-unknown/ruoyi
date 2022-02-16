@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('成绩图示')"/>
+    <th:block th:include="include :: select2-css"/>
+</head>
+<body>
+<div class="main-content">
+    <form id="form-user-add" class="form-horizontal">
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">科目：</label>
+                    <div class="col-sm-8">
+                        <select id="project" class="form-control">
+                            <option value="">-----请选择-----</option>
+                            <option value="chinese" text="语文">语文</option>
+                            <option value="english" text="英语">英语</option>
+                            <option value="mathematics" text="数学">数学</option>
+                            <option value="history" text="历史">历史</option>
+                            <option value="biology" text="生物">生物</option>
+                            <option value="chemistry" text="化学">化学</option>
+                            <option value="physics" text="物理">物理</option>
+                            <option value="geography" text="地理">地理</option>
+                            <option value="politics" text="政治">政治</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div id="myChart" style="width: 100%;height: 500px"></div>
+</div>
+<th:block th:include="include :: footer"/>
+<th:block th:include="include :: select2-js"/>
+<script src="../static/js/echarts.js" th:src="@{/js/echarts.js}"></script>
+<script>
+    $('#project').on('select2:select', function (e) {
+        var val = e.params.data.id;
+        var fieldName = $("#project option:selected").text();
+        var names = [];
+        var fieldValues = [];
+        $.ajax({
+            url: "echarts/" + val,
+            method: 'get',
+            success: function (res) {
+                res.rows.forEach((value, index) => {
+                    names.push(value['name'])
+                    fieldValues.push(value[val])
+                })
+                // drawLine(fieldName, names, fieldValues)
+                test1()
+            }
+        })
+        /*        console.log(e.params.data.id)
+                console.log(e)*/
+    });
+
+    function drawLine(fieldName, names, fieldValues) {
+        // 基于准备好的dom，初始化echarts实例
+        let myChart = this.echarts.init(document.getElementById('myChart'))
+        // console.log(myChart)
+        // 绘制图表
+        myChart.setOption({
+            tooltip: {
+                show: true,
+                trigger: 'axis',
+                //坐标轴指示器
+                axisPointer: {
+                    type: 'cross',
+                    label: {
+                        backgroundColor: '#6a7985'
+                    }
+                }
+            },
+            legend: {
+                //数据为数组
+                data: [fieldName + '柱', fieldName + '折'],
+                show: true,
+                bottom: 0,
+                left: 'center',
+                textStyle: {
+                    color: "#1fc3ce",
+                    fontSize: 14
+                },
+            },
+            //绘制图网格
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            //工具栏
+            toolbox: {
+                feature: {
+                    //保存为图片
+                    saveAsImage: {}
+                }
+            },
+            xAxis: {
+                data: names,
+                axisLabel: {
+                    //解决图标变窄时数据显示不全问题
+                    interval: 0,
+                },
+            },
+            yAxis: {
+                //y轴数据类型
+                type: 'value'
+            },
+            //区域缩放
+            dataZoom: [
+                {
+                    type: 'slider',
+                    show: true,
+                    xAxisIndex: [0],
+                    start: 0,
+                    end: 35
+                },
+                {
+                    type: 'slider',
+                    show: true,
+                    yAxisIndex: [0],
+                    left: '93%',
+                    start: 0,
+                    end: 36
+                },
+                {
+                    type: 'inside',
+                    xAxisIndex: [0],
+                    start: 0,
+                    end: 35
+                },
+                {
+                    type: 'inside',
+                    yAxisIndex: [0],
+                    start: 29,
+                    end: 36
+                }
+            ],
+            series: [{
+                name: fieldName + '柱',
+                type: 'bar',
+                data: fieldValues,
+                //柱状图显示值
+                itemStyle: {
+                    normal: {
+                        color: "#217ec6",
+                        label: {
+                            show: true,
+                            position: 'top',
+                            textStyle: {
+                                color: 'black',
+                                fontSize: 16
+                            }
+                        }
+                    }
+                }
+            }, {
+                name: fieldName + '折',
+                type: 'line',
+                data: fieldValues,
+                //显示最大值与最小值
+                markPoint: {
+                    data: [
+                        {type: 'min', name: '最小值'},
+                        {type: 'max', name: '最大值'},
+                    ]
+                },
+                //显示平均值
+                markLine: {
+                    data: [
+                        {type: 'average', name: '平均值'}
+                    ]
+                },
+                itemStyle: {
+                    normal: {
+                        color: "#0b3bd2"
+                    }
+                }
+            }]
+        })
+        ;
+        //设置图标自适应大小
+        setTimeout(function () {
+            window.onresize = function () {
+                myChart.resize()
+            }
+        }, 100)
+    }
+
+    function test1() {
+
+        var chartDom = document.getElementById('myChart');
+        var myChart = echarts.init(chartDom);
+        var option;
+
+        option = {
+            color: ['#80FFA5', '#00DDFF', '#37A2FF', '#FF0087', '#FFBF00'],
+            title: {
+                text: 'Gradient Stacked Area Chart'
+            },
+            //提示信息
+            tooltip: {
+                //是否显示提示框组件，包括提示框浮层和axisPointer
+                show: true,
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross',
+                    label: {
+                        backgroundColor: '#6a7985'
+                    }
+                }
+            },
+            legend: {
+                data: ['Line 1', 'Line 2', 'Line 3', 'Line 4', 'Line 5']
+            },
+            toolbox: {
+                feature: {
+                    saveAsImage: {}
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: [
+                {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value'
+                }
+            ],
+            //区域缩放
+            dataZoom: [
+                {
+                    type: 'slider',
+                    show: true,
+                    xAxisIndex: [0],
+                    start: 1,
+                    end: 35
+                },
+                {
+                    type: 'slider',
+                    show: true,
+                    yAxisIndex: [0],
+                    left: '93%',
+                    start: 29,
+                    end: 36
+                },
+                {
+                    type: 'inside',
+                    xAxisIndex: [0],
+                    start: 1,
+                    end: 35
+                },
+                {
+                    type: 'inside',
+                    yAxisIndex: [0],
+                    start: 29,
+                    end: 36
+                }
+            ],
+            series: [
+                {
+                    name: 'Line 1',
+                    type: 'line',
+                    stack: 'Total',
+                    smooth: true,
+                    lineStyle: {
+                        width: 0
+                    },
+                    showSymbol: false,
+                    areaStyle: {
+                        opacity: 0.8,
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            {
+                                offset: 0,
+                                color: 'rgb(128, 255, 165)'
+                            },
+                            {
+                                offset: 1,
+                                color: 'rgb(1, 191, 236)'
+                            }
+                        ])
+                    },
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: [140, 232, 101, 264, 90, 340, 250]
+                },
+                {
+                    name: 'Line 2',
+                    type: 'line',
+                    stack: 'Total',
+                    smooth: true,
+                    lineStyle: {
+                        width: 0
+                    },
+                    showSymbol: false,
+                    areaStyle: {
+                        opacity: 0.8,
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            {
+                                offset: 0,
+                                color: 'rgb(0, 221, 255)'
+                            },
+                            {
+                                offset: 1,
+                                color: 'rgb(77, 119, 255)'
+                            }
+                        ])
+                    },
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: [120, 282, 111, 234, 220, 340, 310]
+                },
+                {
+                    name: 'Line 3',
+                    type: 'line',
+                    stack: 'Total',
+                    smooth: true,
+                    lineStyle: {
+                        width: 0
+                    },
+                    showSymbol: false,
+                    areaStyle: {
+                        opacity: 0.8,
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            {
+                                offset: 0,
+                                color: 'rgb(55, 162, 255)'
+                            },
+                            {
+                                offset: 1,
+                                color: 'rgb(116, 21, 219)'
+                            }
+                        ])
+                    },
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: [320, 132, 201, 334, 190, 130, 220]
+                },
+                {
+                    name: 'Line 4',
+                    type: 'line',
+                    stack: 'Total',
+                    smooth: true,
+                    lineStyle: {
+                        width: 0
+                    },
+                    showSymbol: false,
+                    areaStyle: {
+                        opacity: 0.8,
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            {
+                                offset: 0,
+                                color: 'rgb(255, 0, 135)'
+                            },
+                            {
+                                offset: 1,
+                                color: 'rgb(135, 0, 157)'
+                            }
+                        ])
+                    },
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: [220, 402, 231, 134, 190, 230, 120]
+                },
+                {
+                    name: 'Line 5',
+                    type: 'line',
+                    stack: 'Total',
+                    smooth: true,
+                    lineStyle: {
+                        width: 0
+                    },
+                    showSymbol: false,
+                    label: {
+                        show: true,
+                        position: 'top'
+                    },
+                    areaStyle: {
+                        opacity: 0.8,
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            {
+                                offset: 0,
+                                color: 'rgb(255, 191, 0)'
+                            },
+                            {
+                                offset: 1,
+                                color: 'rgb(224, 62, 76)'
+                            }
+                        ])
+                    },
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: [220, 302, 181, 234, 210, 290, 150]
+                }
+            ]
+        };
+
+        option && myChart.setOption(option);
+    }
+
+    /*$(function() {
+        $('#project').select2({
+            placeholder: "请选择岗位",
+            allowClear: true
+        });
+    })*/
+</script>
+</body>
+
+</html>

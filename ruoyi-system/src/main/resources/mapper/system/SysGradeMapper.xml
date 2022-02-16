@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysGradeMapper">
+    <resultMap id="SysGradeResult" type="SysGrade">
+        <id column="id" property="id"></id>
+        <result column="name" property="name"/>
+        <result column="chinese" property="chinese"/>
+        <result column="english" property="english"/>
+        <result column="mathematics" property="mathematics"/>
+        <result column="history" property="history"/>
+        <result column="biology" property="biology"/>
+        <result column="chemistry" property="chemistry"/>
+        <result column="physics" property="physics"/>
+        <result column="geography" property="geography"/>
+        <result column="politics" property="politics"/>
+    </resultMap>
+    <sql id="selectGradeVo">
+        select id,name,chinese,english,mathematics,history,biology,chemistry,physics,geography,politics from sys_grade
+    </sql>
+    <select id="getSysGradeList" resultMap="SysGradeResult">
+        <include refid="selectGradeVo"/>
+        <where>
+            <if test="id !=null and id !=''">
+                id=#{id}
+            </if>
+            <if test="name !=null and name !=''">
+                and name=#{name}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertSysGrade" parameterType="SysGrade" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_grade(
+        <if test="name != null and name != ''">name,</if>
+        <if test="chinese != null and chinese != ''">chinese,</if>
+        <if test="english != null and english != ''">english,</if>
+        <if test="mathematics != null and mathematics != ''">mathematics,</if>
+        <if test="history != null and history != ''">history,</if>
+        <if test="biology != null and biology != ''">biology,</if>
+        <if test="chemistry != null and chemistry != ''">chemistry,</if>
+        <if test="physics != null and physics != ''">physics,</if>
+        <if test="geography != null and geography != ''">geography,</if>
+        <if test="politics != null and politics != ''">politics</if>
+        )
+        values(
+        <if test="name != null and name != ''">#{name},</if>
+        <if test="chinese != null and chinese != ''">#{chinese},</if>
+        <if test="english != null and english != ''">#{english},</if>
+        <if test="mathematics != null and mathematics != ''">#{mathematics},</if>
+        <if test="history != null and history != ''">#{history},</if>
+        <if test="biology != null and biology != ''">#{biology},</if>
+        <if test="chemistry != null and chemistry != ''">#{chemistry},</if>
+        <if test="physics != null and physics != ''">#{physics},</if>
+        <if test="geography != null and geography != ''">#{geography},</if>
+        <if test="politics != null and politics != ''">#{politics}</if>
+        )
+    </insert>
+    
+    <select id="getSysGradeById" parameterType="Integer" resultMap="SysGradeResult">
+        <include refid="selectGradeVo"/>
+        where
+        <if test="id>=0">
+            id=#{id}
+        </if>
+    </select>
+
+    <select id="getSysGradeByName" parameterType="Integer" resultMap="SysGradeResult">
+        <include refid="selectGradeVo"/>
+        where
+        <if test="name!='' and name!=null">
+            name=#{name}
+        </if>
+    </select>
+    <update id="updateSysGrade">
+        update sys_grade
+        <set>
+            <if test="name != null and name != ''">name=#{name},</if>
+            <if test="chinese != null and chinese != ''">chinese=#{chinese},</if>
+            <if test="english != null and english != ''">english=#{english},</if>
+            <if test="mathematics != null and mathematics != ''">mathematics=#{mathematics},</if>
+            <if test="history != null and history != ''">history=#{history},</if>
+            <if test="biology != null and biology != ''">biology=#{biology},</if>
+            <if test="chemistry != null and chemistry != ''">chemistry=#{chemistry},</if>
+            <if test="physics != null and physics != ''">physics=#{physics},</if>
+            <if test="geography != null and geography != ''">geography=#{geography},</if>
+            <if test="politics != null and politics != ''">politics=#{politics}</if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <delete id="deleteSysGradeByIds">
+        delete from sys_grade where id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="getSysGradeSum" resultMap="SysGradeResult">
+        select sum(chinese) chinese,sum(english) english,sum(mathematics) mathematics,sum(history) history,sum(biology) biology,sum(chemistry) chemistry,sum(physics) physics,sum(geography) geography,sum(politics) politics from sys_grade;
+    </select>
+
+    <select id="getSysGradeByProject" resultMap="SysGradeResult">
+        select id,name,${project} from sys_grade
+    </select>
+</mapper>
